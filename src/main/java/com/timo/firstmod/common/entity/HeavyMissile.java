@@ -3,6 +3,8 @@ package com.timo.firstmod.common.entity;
 import com.timo.firstmod.utils.ExplosionUtils;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
@@ -11,6 +13,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.NetworkHooks;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.controller.AnimationController;
@@ -28,6 +32,17 @@ public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
 	@Override
 	public void tick() {
 		super.tick();
+		
+		//Particle Spawning Client Side
+		if(level.isClientSide()) {
+			Vec3 pos = this.getNullPos().add(this.getDeltaMovement().normalize().multiply(-0.45, -0.45, -0.45));
+			Vec3 mov = this.getDeltaMovement().normalize().multiply(-0.4,-0.4,-0.4);
+			if (this.isInWater()) {
+				if(random.nextDouble() < 0.6) level.addParticle(ParticleTypes.BUBBLE, pos.x, pos.y, pos.z, mov.x, mov.y, mov.z);
+	        } else {
+	        	if(random.nextDouble() < 0.6) level.addParticle(ParticleTypes.FLAME, pos.x, pos.y, pos.z, mov.x, mov.y, mov.z);
+	        }
+	    }
 	}
 	
 	public void explode(Level level, BlockPos pos) {
@@ -80,6 +95,15 @@ public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
 	}
 	
 	//other stuff
+	public Vec3 getNullPos() {
+		return new Vec3(this.getX(),this.getY(),this.getZ());
+	}
+	
+	@Override
+	public Packet<?> getAddEntityPacket() {
+		return NetworkHooks.getEntitySpawningPacket(this);
+	}
+	
 	@Override
 	protected void defineSynchedData() {
 		

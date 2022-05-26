@@ -125,10 +125,6 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 		this.discard();
 	}
 	
-	public Vec3 getNullPos() {
-		return new Vec3(this.getX(),this.getY(),this.getZ());
-	}
-	
 	public void setRotation(float xRot, float yRot) {
 		this.setXRot(xRot);
 		this.xRotO = xRot;
@@ -228,6 +224,10 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	}
 	
 	//other stuff
+	public Vec3 getNullPos() {
+		return new Vec3(this.getX(),this.getY(),this.getZ());
+	}
+	
 	@Override
 	public Packet<?> getAddEntityPacket() {
 		return NetworkHooks.getEntitySpawningPacket(this);
