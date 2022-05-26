@@ -1,0 +1,6 @@
+{
+	"parent": "item/handheld",
+	"textures": {
+		"layer0": "firstmod:items/block_tp_wand_full"
+	}
+}

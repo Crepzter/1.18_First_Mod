@@ -1,0 +1,267 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.snowman_cannon.walk": {
+			"animation_length": 2,
+			"bones": {
+				"middle_body": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5833": {
+							"vector": [0, -20, 0]
+						},
+						"1.375": {
+							"vector": [0, 20, 0]
+						},
+						"2.0": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"lower_body": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, -30, 0]
+						},
+						"1.5": {
+							"vector": [0, 30, 0]
+						},
+						"2.0": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"animation.snowman_cannon.enrage": {
+			"animation_length": 1.5,
+			"bones": {
+				"cover_left": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.0": {
+							"vector": [0, 110, 0]
+						}
+					}
+				},
+				"cover_right": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.0": {
+							"vector": [0, -110, 0]
+						}
+					}
+				},
+				"cannon_1": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.0": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"cannon_2": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.5": {
+							"vector": [0, 0, -7]
+						}
+					}
+				}
+			}
+		},
+		"animation.snowman_cannon.derage": {
+			"animation_length": 1.5,
+			"bones": {
+				"cover_left": {
+					"rotation": {
+						"0.5": {
+							"vector": [0, 110, 0]
+						},
+						"1.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"cover_right": {
+					"rotation": {
+						"0.5": {
+							"vector": [0, -110, 0]
+						},
+						"1.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"cannon_1": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.0": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"cannon_2": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, -7]
+						},
+						"1.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"animation.snowman_cannon.head_peace": {
+			"animation_length": 0.5,
+			"bones": {
+				"cover_left": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"cover_right": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"cannon_1": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"cannon_2": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"animation.snowman_cannon.head_angry": {
+			"animation_length": 0.2,
+			"bones": {
+				"cover_left": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 110, 0]
+						},
+						"0.2": {
+							"vector": [0, 110, 0]
+						}
+					}
+				},
+				"cover_right": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, -110, 0]
+						},
+						"0.2": {
+							"vector": [0, -110, 0]
+						}
+					}
+				},
+				"cannon_2": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, -7]
+						},
+						"0.2": {
+							"vector": [0, 0, -7]
+						}
+					}
+				}
+			}
+		},
+		"animation.snowman_cannon.attack": {
+			"animation_length": 0.25,
+			"bones": {
+				"cover_left": {
+					"rotation": {
+						"vector": [0, 110, 0]
+					}
+				},
+				"cover_right": {
+					"rotation": {
+						"vector": [0, -110, 0]
+					}
+				},
+				"cannon_1": {
+					"position": {
+						"vector": [0, 0, 0]
+					}
+				},
+				"cannon_2": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.125": {
+							"vector": [-10, 0, 0]
+						},
+						"0.25": {
+							"vector": [0, 0, 0]
+						}
+					},
+					"position": {
+						"vector": [0, 0, -7]
+					}
+				}
+			}
+		},
+		"animation.snowman_cannon.idle": {
+			"animation_length": 1.5,
+			"bones": {
+				"arms": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.7917": {
+							"vector": [0, 1, 0]
+						},
+						"1.5": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

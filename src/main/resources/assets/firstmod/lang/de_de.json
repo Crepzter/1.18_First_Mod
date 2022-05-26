@@ -1,0 +1,35 @@
+{
+	"item.firstmod.test_item": "Test Item",
+	"item.firstmod.f": "F",
+	
+	"item.firstmod.snowman_cannon_spawn_egg": "Kanonen Schneemann Spawn Egg",
+	
+	"item.firstmod.gravity_wand": "Schwerkraftsstab",
+	"item.firstmod.magic_lamp": "Wunderlampe",
+	"item.firstmod.block_tp_wand": "Block Teleportationsstab",
+	"item.firstmod.rocket_launcher": "Raketenwerfer",
+	"item.firstmod.walkie_talkie": "Funkgerät",
+	
+	"item.firstmod.rgb_block": "RGB Block",
+	"item.firstmod.test_block": "Test Block",
+	"item.firstmod.lightning_block": "Blitz Block",
+	
+	"block.firstmod.rgb_block": "RGB Block",
+	"block.firstmod.test_block": "Test Block",
+	"block.firstmod.lightning_block": "Blitz Block",
+	
+	"entity.firstmod.dshinni": "Dshinni",
+	"entity.firstmod.snowman_cannon": "Kanonen Schneemann",
+	
+	"entity.firstmod.small_missile": "Kleine Rakete",
+	"entity.firstmod.heavy_missile": "Große Rakete",
+	"entity.firstmod.heavy_bomb": "Große Bombe",
+	
+	"itemGroup.firstmod_tab": "First Mod",
+	
+	"tooltip.firstmod.block_tp_wand_shift": "\u00A77Rechtsklicke einen Block um ihn zu Speichern und wo anders zu Platzieren. \u00A7r",
+	"tooltip.firstmod.block_tp_wand_empty": "\u00A77Kein Block gespeichert. \u00A76[SHIFT]\u00A7r \u00A77für mehr Informationen. \u00A7r",
+	"tooltip.firstmod.block_tp_wand_full": "\u00A77Ein Block gespeichert. \u00A76[SHIFT]\u00A7r \u00A77für mehr Informationen. \u00A7r",
+	"tooltip.firstmod.magic_lamp_used": "\u00A77 Diese Wunderlampe enthält keinen Flaschengeist mehr. \u00A7r",
+	"tooltip.firstmod.magic_lamp_unused": "\u00A77 Diese Wunderlampe enthält einen Flaschengeist. Schüttele Sie. \u00A7r"
+}

@@ -1,0 +1,25 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"shoot": {
+			"animation_length": 1,
+			"bones": {
+				"back": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.6667": {
+							"vector": [0, 0, -17],
+							"easing": "easeInExpo"
+						},
+						"1.0": {
+							"vector": [0, 0, -17]
+						}
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

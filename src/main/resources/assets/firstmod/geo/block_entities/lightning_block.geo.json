@@ -1,0 +1,78 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.lightning_block",
+				"texture_width": 32,
+				"texture_height": 32,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "VoxelShapes",
+					"pivot": [0, 8, 0]
+				},
+				{
+					"name": "base",
+					"parent": "VoxelShapes",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{
+							"origin": [-7, 0, -7],
+							"size": [14, 1, 14],
+							"uv": {
+								"north": {"uv": [14, 0], "uv_size": [14, 1]},
+								"east": {"uv": [14, 1], "uv_size": [14, 1]},
+								"south": {"uv": [14, 2], "uv_size": [14, 1]},
+								"west": {"uv": [14, 3], "uv_size": [14, 1]},
+								"up": {"uv": [0, 0], "uv_size": [14, 14]},
+								"down": {"uv": [0, 28], "uv_size": [14, -14]}
+							}
+						}
+					]
+				},
+				{
+					"name": "2",
+					"parent": "VoxelShapes",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{
+							"origin": [0, 1, 0],
+							"size": [1, 8, 1],
+							"uv": {
+								"north": {"uv": [14, 4], "uv_size": [1, 8]},
+								"east": {"uv": [14, 12], "uv_size": [1, 8]},
+								"south": {"uv": [15, 4], "uv_size": [1, 8]},
+								"west": {"uv": [15, 12], "uv_size": [1, 8]},
+								"up": {"uv": [16, 14], "uv_size": [1, 1]},
+								"down": {"uv": [16, 16], "uv_size": [1, -1]}
+							}
+						}
+					]
+				},
+				{
+					"name": "1",
+					"parent": "VoxelShapes",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{
+							"origin": [-1, 1, -1],
+							"size": [1, 2, 1],
+							"uv": {
+								"north": {"uv": [16, 4], "uv_size": [1, 2]},
+								"east": {"uv": [16, 6], "uv_size": [1, 2]},
+								"south": {"uv": [16, 8], "uv_size": [1, 2]},
+								"west": {"uv": [16, 10], "uv_size": [1, 2]},
+								"up": {"uv": [16, 12], "uv_size": [1, 1]},
+								"down": {"uv": [16, 14], "uv_size": [1, -1]}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

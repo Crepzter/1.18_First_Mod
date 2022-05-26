@@ -1,0 +1,35 @@
+{
+	"item.firstmod.test_item": "Test Item",
+	"item.firstmod.f": "F",
+	
+	"item.firstmod.snowman_cannon_spawn_egg": "Cannon Snowman Spawn Egg",
+	
+	"item.firstmod.gravity_wand": "Gravity Wand",
+	"item.firstmod.magic_lamp": "Magic Lamp",
+	"item.firstmod.block_tp_wand": "Block Teleportation Wand",
+	"item.firstmod.rocket_launcher": "Rocket Launcher",
+	"item.firstmod.walkie_talkie": "Walkie Talkie",
+	
+	"item.firstmod.rgb_block": "RGB Block",
+	"item.firstmod.test_block": "Test Block",
+	"item.firstmod.lightning_block": "Lightning Block",
+	
+	"block.firstmod.rgb_block": "RGB Block",
+	"block.firstmod.test_block": "Test Block",
+	"block.firstmod.lightning_block": "Lightning Block",
+	
+	"entity.firstmod.dshinni": "Dshinni",
+	"entity.firstmod.snowman_cannon": "Cannon Snowman",
+	
+	"entity.firstmod.small_missile": "Small Missile",
+	"entity.firstmod.heavy_missile": "Heavy Missile",
+	"entity.firstmod.heavy_bomb": "Heavy Bomb",
+	
+	"itemGroup.firstmod_tab": "First Mod",
+	
+	"tooltip.firstmod.block_tp_wand_shift": "\u00A77Right-Click a block to save it and place it somewhere else. \u00A7r",
+	"tooltip.firstmod.block_tp_wand_empty": "\u00A77No block saved. \u00A76[SHIFT]\u00A7r \u00A77for more information. \u00A7r",
+	"tooltip.firstmod.block_tp_wand_full": "\u00A77A Block is saved. \u00A76[SHIFT]\u00A7r \u00A77for more information.  \u00A7r",
+	"tooltip.firstmod.magic_lamp_used": "\u00A77This magic lamp doesnt contain any dshinni. \u00A7r",
+	"tooltip.firstmod.magic_lamp_unused": "\u00A77This magic lamp contains a dshinni. Shake it. \u00A7r"
+}
