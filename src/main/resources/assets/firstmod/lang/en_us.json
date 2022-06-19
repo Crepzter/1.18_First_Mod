@@ -1,6 +1,7 @@
 {
 	"item.firstmod.test_item": "Test Item",
 	"item.firstmod.f": "F",
+	"item.firstmod.rifle_ammo": "Rifle Ammo",
 	
 	"item.firstmod.snowman_cannon_spawn_egg": "Cannon Snowman Spawn Egg",
 	
@@ -9,6 +10,7 @@
 	"item.firstmod.block_tp_wand": "Block Teleportation Wand",
 	"item.firstmod.rocket_launcher": "Rocket Launcher",
 	"item.firstmod.walkie_talkie": "Walkie Talkie",
+	"item.firstmod.rifle": "Rifle",
 	
 	"item.firstmod.rgb_block": "RGB Block",
 	"item.firstmod.test_block": "Test Block",

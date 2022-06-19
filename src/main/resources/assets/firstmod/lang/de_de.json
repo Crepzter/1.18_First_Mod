@@ -1,6 +1,7 @@
 {
 	"item.firstmod.test_item": "Test Item",
 	"item.firstmod.f": "F",
+	"item.firstmod.rifle_ammo": "Maschinengewehr Munition",
 	
 	"item.firstmod.snowman_cannon_spawn_egg": "Kanonen Schneemann Spawn Egg",
 	
@@ -9,6 +10,7 @@
 	"item.firstmod.block_tp_wand": "Block Teleportationsstab",
 	"item.firstmod.rocket_launcher": "Raketenwerfer",
 	"item.firstmod.walkie_talkie": "Funkgerät",
+	"item.firstmod.rifle": "Maschinengewehr",
 	
 	"item.firstmod.rgb_block": "RGB Block",
 	"item.firstmod.test_block": "Test Block",

@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import com.timo.firstmod.FirstMod;
 import com.timo.firstmod.client.renderer.item.RocketLauncherRenderer;
-import com.timo.firstmod.common.entity.SmallMissile;
+import com.timo.firstmod.common.entity.projectile.SmallMissile;
 import com.timo.firstmod.core.init.EntityInit;
 import com.timo.firstmod.core.init.PacketHandler;
 import com.timo.firstmod.core.network.ServerBoundRocketLauncherUsePacket;

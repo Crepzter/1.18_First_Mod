@@ -6,6 +6,7 @@ import com.timo.firstmod.common.item.GravityWand;
 import com.timo.firstmod.common.item.MagicLamp;
 import com.timo.firstmod.common.item.RocketLauncher;
 import com.timo.firstmod.common.item.WalkieTalkie;
+import com.timo.firstmod.common.item.ammo.RifleAmmo;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -23,6 +24,7 @@ public final class ItemInit {
 	public static final RegistryObject<Item> TEST_ITEM = ITEMS.register("test_item", () -> new Item( new Item.Properties().tab(FirstMod.FIRSTMOD_TAB).fireResistant().stacksTo(17) ) );
 	public static final RegistryObject<Item> F = ITEMS.register("f", () -> new Item( new Item.Properties().stacksTo(420).tab(FirstMod.FIRSTMOD_TAB) ) );
 	public static final RegistryObject<ForgeSpawnEggItem> SNOWMAN_CANNON_SPAWN_EGG = ITEMS.register("snowman_cannon_spawn_egg", () -> new ForgeSpawnEggItem(EntityInit.SNOWMAN_CANNON,0xf7f7f7,0xf78307,new Item.Properties().tab(FirstMod.FIRSTMOD_TAB).stacksTo(64)) );
+	public static final RegistryObject<Item> RIFLE_AMMO = ITEMS.register("rifle_ammo", () -> new RifleAmmo() );
 	
 	//Advanced Items
 	public static final RegistryObject<MagicLamp> MAGIC_LAMP = ITEMS.register("magic_lamp", () -> new MagicLamp() );

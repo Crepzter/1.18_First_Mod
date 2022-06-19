@@ -1,7 +1,7 @@
 package com.timo.firstmod.client.model.entity;
 
 import com.timo.firstmod.FirstMod;
-import com.timo.firstmod.common.entity.SmallMissile;
+import com.timo.firstmod.common.entity.projectile.SmallMissile;
 
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;

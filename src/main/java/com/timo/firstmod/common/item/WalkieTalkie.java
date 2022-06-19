@@ -3,8 +3,8 @@ package com.timo.firstmod.common.item;
 import javax.annotation.Nullable;
 
 import com.timo.firstmod.FirstMod;
-import com.timo.firstmod.common.entity.HeavyBomb;
-import com.timo.firstmod.common.entity.HeavyMissile;
+import com.timo.firstmod.common.entity.projectile.HeavyBomb;
+import com.timo.firstmod.common.entity.projectile.HeavyMissile;
 import com.timo.firstmod.core.init.EntityInit;
 
 import net.minecraft.core.BlockPos;
@@ -41,6 +41,12 @@ public class WalkieTalkie extends Item {
 	
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand pUsedHand) {
+		airStrike(level,player);
+		
+		return InteractionResultHolder.pass(player.getItemInHand(pUsedHand));
+	}
+	
+	public void airStrike(Level level, Player player) {
 		Vec3 start = player.getEyePosition().add(0,124,0);
 		BlockPos targetB = getTargetBlock(player, level, 124, 0);
 		
@@ -52,12 +58,11 @@ public class WalkieTalkie extends Item {
 			HeavyMissile projectile = new HeavyMissile(EntityInit.HEAVY_MISSILE.get(), level);
 			projectile.setPos(start);
 			
-			projectile.setDeltaMovement(target.subtract(start).normalize().multiply(2.5,2.5,2.5));
+			double speed = HeavyMissile.SPEED;
+			projectile.setDeltaMovement(target.subtract(start).normalize().multiply(speed,speed,speed));
 			
 			level.addFreshEntity(projectile);
 		}
-		
-		return InteractionResultHolder.pass(player.getItemInHand(pUsedHand));
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.timo.firstmod.common.entity;
+package com.timo.firstmod.common.entity.projectile;
 
 import java.util.UUID;
 

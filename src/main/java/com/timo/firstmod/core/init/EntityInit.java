@@ -2,10 +2,10 @@ package com.timo.firstmod.core.init;
 
 import com.timo.firstmod.FirstMod;
 import com.timo.firstmod.common.entity.Dshinni;
-import com.timo.firstmod.common.entity.HeavyBomb;
-import com.timo.firstmod.common.entity.HeavyMissile;
-import com.timo.firstmod.common.entity.SmallMissile;
 import com.timo.firstmod.common.entity.SnowmanCannon;
+import com.timo.firstmod.common.entity.projectile.HeavyBomb;
+import com.timo.firstmod.common.entity.projectile.HeavyMissile;
+import com.timo.firstmod.common.entity.projectile.SmallMissile;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
