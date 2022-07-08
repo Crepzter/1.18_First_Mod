@@ -6,6 +6,7 @@ import com.timo.firstmod.client.renderer.block_entity.LightningBlockEntityRender
 import com.timo.firstmod.client.renderer.entity.DshinniRenderer;
 import com.timo.firstmod.client.renderer.entity.HeavyBombRenderer;
 import com.timo.firstmod.client.renderer.entity.HeavyMissileRenderer;
+import com.timo.firstmod.client.renderer.entity.RifleBulletRenderer;
 import com.timo.firstmod.client.renderer.entity.SmallMissileRenderer;
 import com.timo.firstmod.client.renderer.entity.SnowmanCannonRenderer;
 import com.timo.firstmod.core.init.BlockEntityInit;
@@ -41,8 +42,11 @@ public final class ClientModEvents {
 		event.registerEntityRenderer(EntityInit.DSHINNI.get(), DshinniRenderer::new);
 		event.registerEntityRenderer(EntityInit.SNOWMAN_CANNON.get(), SnowmanCannonRenderer::new);
 		event.registerBlockEntityRenderer(BlockEntityInit.LIGHTNING_BLOCK.get(), LightningBlockEntityRenderer::new);
+		
 		event.registerEntityRenderer(EntityInit.SMALL_MISSILE.get(), SmallMissileRenderer::new);
 		event.registerEntityRenderer(EntityInit.HEAVY_MISSILE.get(), HeavyMissileRenderer::new);
 		event.registerEntityRenderer(EntityInit.HEAVY_BOMB.get(), HeavyBombRenderer::new);
+		
+		event.registerEntityRenderer(EntityInit.RIFLE_BULLET.get(), RifleBulletRenderer::new);
 	}
 }

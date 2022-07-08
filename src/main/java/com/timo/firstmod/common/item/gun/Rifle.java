@@ -2,10 +2,11 @@ package com.timo.firstmod.common.item.gun;
 
 import java.util.function.Consumer;
 
-import com.timo.firstmod.FirstMod;
+import com.timo.firstmod.client.renderer.item.RifleRenderer;
 import com.timo.firstmod.client.renderer.item.RocketLauncherRenderer;
 import com.timo.firstmod.common.item.RocketLauncher;
 import com.timo.firstmod.common.item.ammo.AbstractAmmo;
+import com.timo.firstmod.common.item.ammo.RifleAmmo;
 
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -31,18 +32,38 @@ import software.bernie.geckolib3.network.GeckoLibNetwork;
 import software.bernie.geckolib3.network.ISyncable;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
-public abstract class AbstractGun extends Item {
-	protected static final String CONTROLLER_NAME = "shootController";
-	public static final int ANIM_SHOOT = 1;
-	public static final int ANIM_RELOAD = 2;
-	
-	public AbstractGun() {
-		super(new Properties().tab(FirstMod.FIRSTMOD_TAB).stacksTo(1));
+public class Rifle extends AbstractGun implements IAnimatable, ISyncable {
+
+	public Rifle() {
+		super();
+		GeckoLibNetwork.registerSyncable(this);
 	}
 	
-	public abstract AbstractAmmo getAmmo();
+	@Override	
+	public AbstractAmmo getAmmo() {
+		return null;
+	}
 	
-	/*
+	//geckolib
+	@Override
+	public void initializeClient(Consumer<IItemRenderProperties> consumer) {
+		super.initializeClient(consumer);
+		consumer.accept(new IItemRenderProperties() {
+			private final BlockEntityWithoutLevelRenderer renderer = new RifleRenderer();
+
+			@Override
+			public BlockEntityWithoutLevelRenderer getItemStackRenderer() {
+				return renderer;
+			}
+		});
+	}
+
+	@Override
+	public void registerControllers(AnimationData data) {
+		AnimationController<Rifle> controller = new AnimationController<Rifle>(this, CONTROLLER_NAME, 5, this::predicate);
+		data.addAnimationController(controller);
+	}
+	
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
 		if(player.isShiftKeyDown()) playReloadAnim(player.getItemInHand(hand), level, player);
@@ -92,22 +113,5 @@ public abstract class AbstractGun extends Item {
 				controller.setAnimation(new AnimationBuilder().addAnimation("reload", false));
 			}
 		}
-	}*/
-
-	//other stuff
-	@Override
-	public boolean canAttackBlock(BlockState state, Level level, BlockPos pos, Player player) {
-		return false;
 	}
-
-	@Override
-	public boolean isEnchantable(ItemStack stack) {
-		return false;
-	}
-
-	@Override
-	public boolean isFoil(ItemStack stack) {
-		return false;
-	}
-
 }

@@ -7,6 +7,7 @@ import com.timo.firstmod.common.item.MagicLamp;
 import com.timo.firstmod.common.item.RocketLauncher;
 import com.timo.firstmod.common.item.WalkieTalkie;
 import com.timo.firstmod.common.item.ammo.RifleAmmo;
+import com.timo.firstmod.common.item.gun.Rifle;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -30,8 +31,10 @@ public final class ItemInit {
 	public static final RegistryObject<MagicLamp> MAGIC_LAMP = ITEMS.register("magic_lamp", () -> new MagicLamp() );
 	public static final RegistryObject<BlockTeleportWand> BLOCK_TP_WAND = ITEMS.register("block_tp_wand", () -> new BlockTeleportWand() );
 	public static final RegistryObject<GravityWand> GRAVITY_WAND = ITEMS.register("gravity_wand", () -> new GravityWand() );
+	
 	public static final RegistryObject<RocketLauncher> ROCKET_LAUNCHER = ITEMS.register("rocket_launcher", () -> new RocketLauncher() );
 	public static final RegistryObject<WalkieTalkie> WALKIE_TALKIE = ITEMS.register("walkie_talkie", () -> new WalkieTalkie() );
+	public static final RegistryObject<Rifle> RIFLE = ITEMS.register("rifle", () -> new Rifle() );
 	
 	//Block Items
 	public static final RegistryObject<BlockItem> RGB_BLOCK_ITEM = ITEMS.register("rgb_block", () -> new BlockItem(BlockInit.RGB_BLOCK.get(), new BlockItem.Properties().stacksTo(64).tab(FirstMod.FIRSTMOD_TAB) ) );

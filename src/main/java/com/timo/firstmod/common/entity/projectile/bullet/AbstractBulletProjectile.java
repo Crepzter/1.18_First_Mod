@@ -38,7 +38,7 @@ public class AbstractBulletProjectile  extends ThrowableProjectile implements IA
 	protected void onHitEntity(EntityHitResult result) {
 		super.onHitEntity(result);
 		if(result.getEntity() instanceof LivingEntity entity) {
-			entity.hurt(DamageSource.playerAttack(this.getPlayer()), 8);
+			//entity.hurt(DamageSource.playerAttack(this.getPlayer()), 8);
 		}
 		
 	}

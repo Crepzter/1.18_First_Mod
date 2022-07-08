@@ -6,7 +6,7 @@ import net.minecraft.world.level.Level;
 
 public class RifleBullet extends AbstractBulletProjectile {
 
-	protected RifleBullet(EntityType<? extends ThrowableProjectile> entity, Level level) {
+	public RifleBullet(EntityType<? extends ThrowableProjectile> entity, Level level) {
 		super(entity, level);
 	}
 

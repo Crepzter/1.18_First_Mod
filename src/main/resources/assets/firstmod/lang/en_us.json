@@ -27,6 +27,8 @@
 	"entity.firstmod.heavy_missile": "Heavy Missile",
 	"entity.firstmod.heavy_bomb": "Heavy Bomb",
 	
+	"entity.firstmod.rifle_bullet": "Rifle Bullet",
+	
 	"itemGroup.firstmod_tab": "First Mod",
 	
 	"tooltip.firstmod.block_tp_wand_shift": "\u00A77Right-Click a block to save it and place it somewhere else. \u00A7r",

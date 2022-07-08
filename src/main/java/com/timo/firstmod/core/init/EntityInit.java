@@ -6,6 +6,7 @@ import com.timo.firstmod.common.entity.SnowmanCannon;
 import com.timo.firstmod.common.entity.projectile.HeavyBomb;
 import com.timo.firstmod.common.entity.projectile.HeavyMissile;
 import com.timo.firstmod.common.entity.projectile.SmallMissile;
+import com.timo.firstmod.common.entity.projectile.bullet.RifleBullet;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -44,5 +45,11 @@ public class EntityInit {
 			.sized(0.7f, 0.7f)
 			.setUpdateInterval(1)
 			.build( new ResourceLocation(FirstMod.MODID,"heavy_bomb").toString() )  );
+	
+	//bullets
+	public static final RegistryObject<EntityType<RifleBullet>> RIFLE_BULLET = ENTITIES.register("rifle_bullet", () -> EntityType.Builder.of(RifleBullet::new, MobCategory.MISC)
+			.sized(0.5f, 0.5f)
+			.setUpdateInterval(1)
+			.build( new ResourceLocation(FirstMod.MODID,"rifle_bullet").toString() )  );
 
 }

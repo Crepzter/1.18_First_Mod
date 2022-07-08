@@ -27,6 +27,8 @@
 	"entity.firstmod.heavy_missile": "Groﬂe Rakete",
 	"entity.firstmod.heavy_bomb": "Groﬂe Bombe",
 	
+	"entity.firstmod.rifle_bullet": "Maschinengewehr Kugel",
+	
 	"itemGroup.firstmod_tab": "First Mod",
 	
 	"tooltip.firstmod.block_tp_wand_shift": "\u00A77Rechtsklicke einen Block um ihn zu Speichern und wo anders zu Platzieren. \u00A7r",
