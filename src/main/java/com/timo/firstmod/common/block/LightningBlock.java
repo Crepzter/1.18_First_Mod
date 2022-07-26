@@ -1,17 +1,15 @@
 package com.timo.firstmod.common.block;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.timo.firstmod.FirstMod;
 import com.timo.firstmod.common.block.entity.LightningBlockEntity;
 import com.timo.firstmod.core.init.BlockEntityInit;
+import com.timo.firstmod.core.init.EntityInit;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -19,6 +17,7 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -31,8 +30,9 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.network.NetworkHooks;
 
-public class LightningBlock extends Block implements EntityBlock {
+public class LightningBlock extends BaseEntityBlock implements EntityBlock {
 	
 	public LightningBlock(Properties properties) {
 		super(properties);
@@ -53,20 +53,28 @@ public class LightningBlock extends Block implements EntityBlock {
 			LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(level);
 			lightning.setPos(player.position());
 			level.addFreshEntity(lightning);
-
+			
 			return InteractionResult.SUCCESS;
 		}
 
 		if (player.isShiftKeyDown() && !level.isClientSide() && interactionHand == InteractionHand.MAIN_HAND) {
             player.displayClientMessage(new TextComponent("Player has clicked " + lightningBE.playerUses.get(player.getUUID()) + " times!"), false);
+            
+            //START OPEN MENU
+			BlockEntity entity = level.getBlockEntity(blockPos);
+            if(entity instanceof LightningBlockEntity) {
+                NetworkHooks.openGui(((ServerPlayer)player), (LightningBlockEntity)entity, blockPos);
+            }
+            
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
 	}
 	
 	@Override
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state,
-			BlockEntityType<T> type) {
-		return level.isClientSide ? null : ($0, $1, $2, blockEntity) -> ((LightningBlockEntity)blockEntity).tick();
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+		//return level.isClientSide ? null : ($0, $1, $2, blockEntity) -> ((LightningBlockEntity)blockEntity).tick();
+		return createTickerHelper(type, BlockEntityInit.LIGHTNING_BLOCK.get(), LightningBlockEntity::tick);
 	}
 	
 	

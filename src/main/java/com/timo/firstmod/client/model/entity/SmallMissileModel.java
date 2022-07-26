@@ -10,16 +10,16 @@ public class SmallMissileModel extends AnimatedGeoModel<SmallMissile> {
 
 	@Override
 	public ResourceLocation getAnimationFileLocation(SmallMissile object) {
-		return new ResourceLocation(FirstMod.MODID, "animations/entities/small_missile.json");
+		return new ResourceLocation(FirstMod.MODID, "animations/entities/projectiles/small_missile.json");
 	}
 
 	@Override
 	public ResourceLocation getModelLocation(SmallMissile object) {
-		return new ResourceLocation(FirstMod.MODID, "geo/entities/small_missile.geo.json");
+		return new ResourceLocation(FirstMod.MODID, "geo/entities/projectiles/small_missile.geo.json");
 	}
 
 	@Override
 	public ResourceLocation getTextureLocation(SmallMissile object) {
-		return new ResourceLocation(FirstMod.MODID, "textures/entities/small_missile.png");
+		return new ResourceLocation(FirstMod.MODID, "textures/entities/projectiles/small_missile.png");
 	}	
 }

@@ -1,4 +1,4 @@
-package com.timo.firstmod.client.event;
+package com.timo.firstmod.event.client;
 
 import com.timo.firstmod.FirstMod;
 

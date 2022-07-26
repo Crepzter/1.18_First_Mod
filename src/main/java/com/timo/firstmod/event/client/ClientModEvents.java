@@ -1,4 +1,4 @@
-package com.timo.firstmod.client.event;
+package com.timo.firstmod.event.client;
 
 import com.timo.firstmod.FirstMod;
 import com.timo.firstmod.client.model.entity.DshinniModel;
@@ -12,7 +12,10 @@ import com.timo.firstmod.client.renderer.entity.SnowmanCannonRenderer;
 import com.timo.firstmod.core.init.BlockEntityInit;
 import com.timo.firstmod.core.init.BlockInit;
 import com.timo.firstmod.core.init.EntityInit;
+import com.timo.firstmod.core.init.MenuInit;
+import com.timo.firstmod.screen.LightningBlockScreen;
 
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.api.distmarker.Dist;
@@ -30,6 +33,8 @@ public final class ClientModEvents {
 	@SubscribeEvent
 	public static void clientSetup(FMLClientSetupEvent event) {
 		ItemBlockRenderTypes.setRenderLayer(BlockInit.TEST_BLOCK.get(), RenderType.cutout()); //wenn löcher int textur
+		
+		MenuScreens.register(MenuInit.LIGHTNING_BLOCK_MENU.get(), LightningBlockScreen::new);
 	}
 	
 	@SubscribeEvent

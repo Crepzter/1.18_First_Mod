@@ -1,27 +1,25 @@
 package com.timo.firstmod;
 
-import java.util.Optional;
-
-import javax.annotation.Nonnull;
-
+import com.timo.firstmod.config.FirstModCommonConfigs;
 import com.timo.firstmod.core.init.BlockEntityInit;
 import com.timo.firstmod.core.init.BlockInit;
 import com.timo.firstmod.core.init.EntityInit;
 import com.timo.firstmod.core.init.ItemInit;
+import com.timo.firstmod.core.init.LootModifierInit;
+import com.timo.firstmod.core.init.MenuInit;
+import com.timo.firstmod.core.init.RecipeInit;
 
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
 import software.bernie.geckolib3.GeckoLib;
 
 @Mod(FirstMod.MODID)
@@ -47,6 +45,11 @@ public class FirstMod {
 		BlockEntityInit.BLOCK_ENTITIES.register(bus);
 		ItemInit.ITEMS.register(bus);
 		EntityInit.ENTITIES.register(bus);
+		LootModifierInit.GLM.register(bus);
+		RecipeInit.RECIPES.register(bus);
+		MenuInit.MENUS.register(bus);
+		
+		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FirstModCommonConfigs.SPEC, "firstmod-common.toml");
 	}
 	
 	//Voxel Shapes 

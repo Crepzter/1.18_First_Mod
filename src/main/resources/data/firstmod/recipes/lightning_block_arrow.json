@@ -1,0 +1,11 @@
+{
+  "type": "firstmod:craft_arrow_fletching",
+  "ingredients": [
+    {
+      "item": "minecraft:stick"
+    }
+  ],
+  "output": {
+    "item": "minecraft:arrow"
+  }
+}
