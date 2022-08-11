@@ -1,12 +1,9 @@
 package com.timo.firstmod.screen;
 
-import java.util.function.Predicate;
-
-import javax.annotation.Nonnull;
-
 import com.timo.firstmod.common.block.entity.LightningBlockEntity;
 import com.timo.firstmod.core.init.BlockInit;
 import com.timo.firstmod.core.init.MenuInit;
+import com.timo.firstmod.screen.slot.ModRestrictedSlot;
 import com.timo.firstmod.screen.slot.ModResultSlot;
 
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,14 +14,11 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
 
 public class LightningBlockMenu extends AbstractContainerMenu {
 	private final LightningBlockEntity blockEntity;
@@ -49,12 +43,9 @@ public class LightningBlockMenu extends AbstractContainerMenu {
 		addPlayerHotbar(inv);
 		
 		this.blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
-			this.addSlot(new LightningBlockCraftSlot(handler, 0, 44, 18, (i) -> i.is(Items.FLINT)));
-            //this.addSlot(new SlotItemHandler(handler, 0, 44, 18));
-            this.addSlot(new LightningBlockCraftSlot(handler, 1, 44, 36, (i) -> i.is(Items.STICK)));
-            //this.addSlot(new SlotItemHandler(handler, 1, 44, 36));
-            this.addSlot(new LightningBlockCraftSlot(handler, 2, 44, 54, (i) -> i.is(Items.FEATHER)));
-            //this.addSlot(new SlotItemHandler(handler, 2, 44, 54));
+			this.addSlot(new ModRestrictedSlot(handler, 0, 44, 18, Items.FLINT));
+            this.addSlot(new ModRestrictedSlot(handler, 1, 44, 36, Items.STICK));
+            this.addSlot(new ModRestrictedSlot(handler, 2, 44, 54, Items.FEATHER));
             this.addSlot(new ModResultSlot(handler, 3, 116, 36));
         });
 		
@@ -141,35 +132,5 @@ public class LightningBlockMenu extends AbstractContainerMenu {
         for (int i = 0; i < 9; ++i) {
             this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 144));
         }
-    }
-}
-
-class FlintSlot extends SlotItemHandler {
-
-	public FlintSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition) {
-		super(itemHandler, index, xPosition, yPosition);
-	}
-	
-	@Override
-    public boolean mayPlace(@Nonnull ItemStack stack)
-    {
-        if (stack.isEmpty() || !stack.is(Items.FLINT)) return false;
-        return true;
-    }
-}
-
-class LightningBlockCraftSlot extends SlotItemHandler {
-	private final Predicate<ItemStack> testItem;
-
-	public LightningBlockCraftSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition, Predicate<ItemStack> testItem) {
-		super(itemHandler, index, xPosition, yPosition);
-		this.testItem = testItem;
-	}
-	
-	@Override
-    public boolean mayPlace(@Nonnull ItemStack stack)
-    {
-        if (stack.isEmpty() || !testItem.test(stack)) return false;
-        return true;
     }
 }

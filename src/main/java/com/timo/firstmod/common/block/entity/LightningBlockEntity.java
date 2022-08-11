@@ -242,7 +242,7 @@ public class LightningBlockEntity extends BlockEntity implements IAnimatable, Me
             //entity.itemHandler.getStackInSlot(2).hurt(1, new Random(), null);
 
             entity.itemHandler.setStackInSlot(3, new ItemStack(match.get().getResultItem().getItem(),
-                    entity.itemHandler.getStackInSlot(3).getCount() + 8));
+                    							 entity.itemHandler.getStackInSlot(3).getCount() + 8));
 
             entity.resetProgress();
         }
