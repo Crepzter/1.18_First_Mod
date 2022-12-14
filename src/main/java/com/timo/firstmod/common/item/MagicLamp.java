@@ -5,6 +5,7 @@ import java.util.List;
 import com.timo.firstmod.FirstMod;
 import com.timo.firstmod.common.entity.Dshinni;
 import com.timo.firstmod.core.init.EntityInit;
+import com.timo.firstmod.utils.ExplosionUtils;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;

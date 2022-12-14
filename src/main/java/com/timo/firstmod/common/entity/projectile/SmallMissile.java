@@ -22,6 +22,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -117,7 +118,17 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	public void explode(BlockPos pos) {
 		if(!level.isClientSide() && shotBy != null) {
 			//world damage
-			ExplosionUtils.sMissileExplode(EXPLOSION_RADIUS, EXPLOSION_STRENGTH, level, pos, true, EXPLOSION_DAMAGE, this, shotBy); //3,2,12
+			//ExplosionUtils.sMissileExplode(EXPLOSION_RADIUS, EXPLOSION_STRENGTH, level, pos, true, EXPLOSION_DAMAGE, this, shotBy); //3,2,12
+			
+			/*BlockPos ppos = pos.below();
+			for(int i = 0;i < 7;i++) {
+				ExplosionUtils e = new ExplosionUtils(level, ppos, 30, 1);
+				e.tExplode();
+				ppos = ppos.above();
+			}*/
+			ExplosionUtils e = new ExplosionUtils(level, pos, 30, 1);
+			e.tExplode3();
+
 			//particles and sound --> Client Side
 			PacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(pos)),
 										new ClientBoundRocketProjectileExplosionPacket(pos));

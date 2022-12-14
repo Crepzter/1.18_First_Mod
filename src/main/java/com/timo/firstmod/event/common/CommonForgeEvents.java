@@ -5,14 +5,21 @@ import com.timo.firstmod.common.entity.SnowmanCannon;
 import com.timo.firstmod.config.FirstModCommonConfigs;
 import com.timo.firstmod.utils.SheepUtils;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -49,8 +56,15 @@ public class CommonForgeEvents {
 	
 	@SubscribeEvent
 	public static void onRightClickFletchingTable(PlayerInteractEvent.RightClickBlock event) {
-		if(event.getPlayer().level.getBlockState(event.getPos()).is(Blocks.FLETCHING_TABLE)) {
+		if(event.getPlayer().level.getBlockState(event.getPos()).is(Blocks.FLETCHING_TABLE) && !event.getPlayer().level.isClientSide()) {
 			System.out.println("clicked");
+			//event.getPlayer().openMenu(state.getMenuProvider(level, pos));
 		}
 	}
+	
+	//public MenuProvider getMenuProvider(BlockState p_52240_, Level p_52241_, BlockPos p_52242_) {
+	//      return new SimpleMenuProvider((p_52229_, p_52230_, p_52231_) -> {
+	//         return new CraftingMenu(p_52229_, p_52230_, ContainerLevelAccess.create(p_52241_, p_52242_));
+	//      }, CONTAINER_TITLE);
+	//}
 }
