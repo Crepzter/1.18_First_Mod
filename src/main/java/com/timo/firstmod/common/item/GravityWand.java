@@ -23,7 +23,8 @@ public class GravityWand extends Item {
 		int r = 6;
 		int strength = 3;
 		
-		ExplosionUtils.sMissileExplode(r, strength, context.getLevel(), hitPos, false, 0, context.getPlayer(), context.getPlayer());
+		ExplosionUtils e = new ExplosionUtils(context.getLevel(), hitPos, r, strength);
+		e.sMissileExplode(false, 0, context.getPlayer(), context.getPlayer());
 		return InteractionResult.SUCCESS;
 	}
 }

@@ -1,0 +1,20 @@
+{
+  "heavy_explosion": {
+    "subtitle": "sounds.firstmod.heavy_explosion",
+    "sounds": [
+      "firstmod:heavy_explosion"
+    ]
+  },
+  "small_missile_flying": {
+    "subtitle": "sounds.firstmod.small_missile_flying",
+    "sounds": [
+      "firstmod:small_missile_flying"
+    ]
+  },
+  "rocket_launcher_target_locked": {
+    "subtitle": "sounds.firstmod.rocket_launcher_target_locked",
+    "sounds": [
+      "firstmod:rocket_launcher_target_locked"
+    ]
+  }
+}

@@ -51,7 +51,7 @@ public class WalkieTalkie extends Item {
 		BlockPos targetB = getTargetBlock(player, level, 124, 0);
 		
 		if(start.y > 180 && targetB != null) {
-			level.setBlockAndUpdate(targetB, Blocks.RED_CONCRETE.defaultBlockState());
+			//level.setBlockAndUpdate(targetB, Blocks.RED_CONCRETE.defaultBlockState());
 			
 			Vec3 target = new Vec3(targetB.getX(),targetB.getY(),targetB.getZ());
 			

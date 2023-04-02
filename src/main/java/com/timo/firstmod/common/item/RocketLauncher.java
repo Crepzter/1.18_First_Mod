@@ -1,6 +1,7 @@
 package com.timo.firstmod.common.item;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -11,7 +12,9 @@ import com.timo.firstmod.client.renderer.item.RocketLauncherRenderer;
 import com.timo.firstmod.common.entity.projectile.SmallMissile;
 import com.timo.firstmod.core.init.EntityInit;
 import com.timo.firstmod.core.init.PacketHandler;
+import com.timo.firstmod.core.init.SoundInit;
 import com.timo.firstmod.core.network.ServerBoundRocketLauncherUsePacket;
+import com.timo.firstmod.utils.ProjectileUtils;
 
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -20,11 +23,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -33,6 +38,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.IItemRenderProperties;
@@ -50,111 +56,129 @@ import software.bernie.geckolib3.network.ISyncable;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 public class RocketLauncher extends Item implements IAnimatable, ISyncable {
-	private static final String CONTROLLER_NAME = "shootController";
-	public static final int ANIM_OPEN = 0;
+	public static final int RANGE = 250;
+	public static final int LOCK_TARGET_TIME = 15;
 	
-	public static final int RANGE = 169;
-	
-	private int entityTick;
+	private int useTick = 0;
+	private int targetTick = 0;
+	private int targetDelay = -1;
 	@Nullable
-	private UUID entityTargetId;
+	private UUID entityTargetId = null;
+	
 
 	public RocketLauncher() {
 		super(new Item.Properties().tab(FirstMod.FIRSTMOD_TAB).stacksTo(1));
 		GeckoLibNetwork.registerSyncable(this);
 	}
-
-	@Override
-	public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int i) {
-		if (entity instanceof Player player) {
-			if (level.isClientSide()	&& player.getDeltaMovement().length() < 0.1d && player.isShiftKeyDown() && !player.getCooldowns().isOnCooldown(this)) {
-				BlockPos p = getTargetBlock(player, level, RANGE, 0);
-				
-				if (entityTargetId != null && entityTick > 15) {
-					PacketHandler.INSTANCE.sendToServer(new ServerBoundRocketLauncherUsePacket(entityTargetId));
-					entityTargetId = null;
-					entityTick = 0;
-				} else if (p != null) {
-					PacketHandler.INSTANCE.sendToServer(new ServerBoundRocketLauncherUsePacket(p));
-				} else return;
-				
-				player.getCooldowns().addCooldown(this, 35);
-
-				Vec3 dir = player.getLookAngle();
-				player.push(-3*dir.x,0.15,-3*dir.z);
-			}
-		}
-	}
 	
-	@Override
-	public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int i) {
-		if (entity instanceof Player player) {
-			if(level.isClientSide()	&& player.getDeltaMovement().length() < 0.1d && player.isShiftKeyDown() && !player.getCooldowns().isOnCooldown(this)) {
-				LivingEntity entityTarget = getTargetEntity(player, level, RANGE, 0);
-				if(entityTarget != null) {
-					UUID id = entityTarget.getUUID();
-					if(id.equals(entityTargetId)) {
-						entityTick++;
-						if(entityTick > 20) {
-							player.playSound(SoundEvents.ANVIL_BREAK, 1.0F, 5.0F);
-							player.displayClientMessage(new TextComponent("Entity targeted: " + entityTarget.getType() ), true);
-							
-							level.addParticle(ParticleTypes.LANDING_LAVA, entityTarget.getX(), entityTarget.getY(1f), entityTarget.getZ(), 0.5d, 0.5d, 0.5d);
-						}
-					}
-					else {
-						entityTargetId = id;
-						entityTick = 0;
-					}
-				} else entityTargetId = null;
-			}
-		}
-	}
 	
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
 		player.startUsingItem(hand);
 		return InteractionResultHolder.pass(player.getItemInHand(hand));
 	}
+	
+	@Override
+	public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int i) {
+		if (entity instanceof Player player && !level.isClientSide() && !player.getCooldowns().isOnCooldown(this)) {
+			LivingEntity entityTarget = getTargetEntity(player, level);
+			
+			if(entityTarget != null) {
+				targetDelay = 0;
+				UUID id = entityTarget.getUUID();
+				
+				if(id.equals(entityTargetId)) {
+					targetTick++;
+				}
+				else {
+					entityTargetId = id;
+					targetTick = 0;
+				}
+			// Time Buffer to make locking target easier
+			} else if (targetDelay > -1) {
+				targetDelay++;
+				if(targetDelay > 8) {
+					targetDelay = -1;
+					entityTargetId = null;
+					targetTick = 0;
+				}
+			}
+			
+			// Play Sound indicating target locked
+			if(entityTargetId != null && targetTick > LOCK_TARGET_TIME) {
+				level.playSound(null, entity.getX(), entity.getEyeY(), entity.getZ(), SoundInit.ROCKET_LAUNCHER_TARGET_LOCKED.get(), SoundSource.PLAYERS, 0.6F, 1F);
+				System.out.println("sound");
+				// Mark Target
+			}
+			useTick++;
+		}
+	}
+
+	@Override
+	public void releaseUsing(ItemStack stack, Level level, LivingEntity shooter, int i) {
+		if( !level.isClientSide() && useTick >= 20 ) {
+			// Reset usetick
+			useTick = 0;
+			
+			// If player cooldown return
+			if(shooter instanceof Player && ((Player)shooter).getCooldowns().isOnCooldown(this)) return;
+			
+			// Shoot at entity
+			if (entityTargetId != null && targetTick > LOCK_TARGET_TIME) {
+				shoot(level, shooter, stack, entityTargetId);
+				
+			// Reset targettick
+			targetTick = 0;
+			entityTargetId = null;
+				
+			// Shoot at blockpos
+			} else  {
+				BlockPos p = getTargetBlock(shooter, level);
+				
+				if(p != null) {
+					shoot(level, shooter, stack, p);
+				} else {
+					return;
+				}
+			}
+			
+			// If player update cooldown
+			if(shooter instanceof Player) ((Player)shooter).getCooldowns().addCooldown(this, 35);
+			
+			// Push shooter back
+			Vec3 dir = shooter.getLookAngle();
+			shooter.push(-3*dir.x,0.15,-3*dir.z);
+			if(shooter instanceof Player) ((Player)shooter).hurtMarked = true;
+		}
+	}
 
 	@Nullable
-	public BlockPos getTargetBlock(Player player, Level level, double range, float p_19909_) { // ..., 20, 0, false
-		Vec3 eye = player.getEyePosition(p_19909_);
-		Vec3 view = player.getViewVector(p_19909_);
-		Vec3 sight = eye.add(view.x * range, view.y * range, view.z * range);
-		HitResult h = level.clip(new ClipContext(eye, sight, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+	public BlockPos getTargetBlock(LivingEntity shooter, Level level) {
+		Vec3 eyePos = shooter.getEyePosition();
+		Vec3 eyeVector = shooter.getViewVector(1.0F).multiply(RANGE, RANGE, RANGE);
+		
+		HitResult h = level.clip( new ClipContext(eyePos, eyePos.add(eyeVector), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, shooter) );
+		
 		if (h.getType() == HitResult.Type.BLOCK) {
 			return ((BlockHitResult)h).getBlockPos();
 		} else {
 			return null;
 		}
 	}
-
+	
 	@Nullable
-	public LivingEntity getTargetEntity(Player player, Level level, double range, float p_19909_) { // ..., 20, 0, false
-		Vec3 eyePos = player.getEyePosition();
-		Vec3 rangeV = new Vec3(RANGE,RANGE,RANGE);
+	public LivingEntity getTargetEntity(Entity shooter, Level level) {
+		Vec3 eyePos = shooter.getEyePosition();
+		Vec3 eyeVector = shooter.getViewVector(1.0F).multiply(RANGE, RANGE, RANGE);
 		
-		for( Entity entity1 : level.getEntities(player, new AABB(eyePos.subtract(rangeV),eyePos.add(rangeV)) ) ) {
-			if(entity1 instanceof LivingEntity) {
-				//enderman approach
-				Vec3 vec3 = player.getViewVector(1.0F).normalize();
-		        Vec3 dis = new Vec3(entity1.getX() - player.getX(), entity1.getEyeY() - player.getEyeY(), entity1.getZ() - player.getZ());
-		        double disLen = dis.length();
-		        dis = dis.normalize();
-		        double dot = vec3.dot(dis);
-		        if(dot > 1.0D - 0.035D / disLen && player.hasLineOfSight(entity1)) return (LivingEntity)entity1;
-		        //TODO boundingbox approach?
-			}
-		}
-		return null;
+		return ProjectileUtils.getEntityLookAt(level, shooter, eyePos, eyePos.add(eyeVector), shooter.getBoundingBox().expandTowards(eyeVector), (Entity) -> true, RANGE);
 	}
 
-	public void shoot(Level level, Player player, ItemStack stack, Object targetO) {
+	public void shoot(Level level, LivingEntity shooter, ItemStack stack, Object targetO) {
 		if (!level.isClientSide()) {
 			SmallMissile projectile = new SmallMissile(EntityInit.SMALL_MISSILE.get(), level);
-			projectile.setPos(player.getEyePosition());
-			projectile.setShotBy(player);
+			projectile.setPos(shooter.getEyePosition());
+			projectile.setShotBy(shooter);
 			
 			if (targetO instanceof UUID targetEId) {
 				projectile.setTarget(targetEId);
@@ -163,10 +187,10 @@ public class RocketLauncher extends Item implements IAnimatable, ISyncable {
 			} else {
 				return;
 			}
-			projectile.firstRotation(player.getViewVector(1f));
+			projectile.firstRotation(shooter.getViewVector(1.0F));
 
 			final int id = GeckoLibUtil.guaranteeIDForStack(stack, (ServerLevel) level);
-			final PacketDistributor.PacketTarget target = PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player);
+			final PacketDistributor.PacketTarget target = PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> shooter);
 			GeckoLibNetwork.syncAnimation(target, this, id, ANIM_OPEN);
 
 			level.addFreshEntity(projectile);
@@ -181,8 +205,13 @@ public class RocketLauncher extends Item implements IAnimatable, ISyncable {
 		tooltipComponents.add(new TextComponent("rocket schooosch"));
 		super.appendHoverText(stack, level, tooltipComponents, pIsAdvanced);
 	}
+	
 
-	// geckolib
+	// Geckolib
+	
+	private static final String CONTROLLER_NAME = "shootController";
+	public static final int ANIM_OPEN = 0;
+	
 	@Override
 	public void initializeClient(Consumer<IItemRenderProperties> consumer) {
 		super.initializeClient(consumer);
@@ -224,8 +253,10 @@ public class RocketLauncher extends Item implements IAnimatable, ISyncable {
 			}
 		}
 	}
+	
 
-	//other stuff
+	// Other stuff
+	
 	@Override
 	public boolean canAttackBlock(BlockState p_41441_, Level p_41442_, BlockPos p_41443_, Player p_41444_) {
 		return false;
@@ -243,7 +274,7 @@ public class RocketLauncher extends Item implements IAnimatable, ISyncable {
 
 	@Override
 	public int getUseDuration(ItemStack p_41454_) {
-		return 40;
+		return 20;
 	}
 
 	@Override

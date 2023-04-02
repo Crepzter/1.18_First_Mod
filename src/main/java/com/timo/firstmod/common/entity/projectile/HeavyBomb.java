@@ -34,7 +34,7 @@ public class HeavyBomb extends ThrowableProjectile implements IAnimatable {
 	}
 	
 	public void explode(Level level, BlockPos pos) {
-		ExplosionUtils.hBombExplode(level, pos, this);
+		
 		this.discard();
 	}
 	

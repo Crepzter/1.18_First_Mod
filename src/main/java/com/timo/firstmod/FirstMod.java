@@ -8,6 +8,7 @@ import com.timo.firstmod.core.init.ItemInit;
 import com.timo.firstmod.core.init.LootModifierInit;
 import com.timo.firstmod.core.init.MenuInit;
 import com.timo.firstmod.core.init.RecipeInit;
+import com.timo.firstmod.core.init.SoundInit;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.CreativeModeTab;
@@ -48,6 +49,7 @@ public class FirstMod {
 		LootModifierInit.GLM.register(bus);
 		RecipeInit.RECIPES.register(bus);
 		MenuInit.MENUS.register(bus);
+		SoundInit.SOUNDS.register(bus);
 		
 		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FirstModCommonConfigs.SPEC, "firstmod-common.toml");
 	}

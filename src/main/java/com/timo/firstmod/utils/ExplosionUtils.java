@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -24,11 +25,56 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.Tags;
 
 public class ExplosionUtils {
-	public static Random random = new Random();
+	private Random random = new Random();
 	
-	public static void sMissileExplode(int r, float strength, Level level, BlockPos pos, boolean fire, int damage, Entity entityExploding, LivingEntity entityAttacker) {
+	private Level level;
+	
+	private BlockPos pos;
+	private Vec3 center; // Vec3 of BlockPos pos
+	private int radius;
+	private float strength;
+	private float[][] bblocks; // x|z
+	private float[][][] bbblocks; // x|y|z
+	int maxHeight;
+	int minHeight;
+	
+	private static final float FIRE_ODDS = 0.1f;
+	
+	private static final Map<Block, Block> BLOCKS_DAMAGED = Map.ofEntries(
+		// Stone
+		Map.entry(Blocks.STONE, Blocks.COBBLESTONE),
+		Map.entry(Blocks.COBBLESTONE, Blocks.GRAVEL),
+		Map.entry(Blocks.STONE_BRICKS, Blocks.CRACKED_STONE_BRICKS),
+		// Logs
+		Map.entry(Blocks.OAK_LOG, Blocks.STRIPPED_OAK_LOG),
+		Map.entry(Blocks.DARK_OAK_LOG, Blocks.STRIPPED_DARK_OAK_LOG),
+		Map.entry(Blocks.BIRCH_LOG, Blocks.STRIPPED_BIRCH_LOG),
+		Map.entry(Blocks.JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_LOG),
+		Map.entry(Blocks.ACACIA_LOG, Blocks.STRIPPED_ACACIA_LOG),
+		Map.entry(Blocks.SPRUCE_LOG, Blocks.STRIPPED_SPRUCE_LOG),
+		Map.entry(Blocks.GRASS_BLOCK, Blocks.DIRT)
+	);
+	
+	
+	public ExplosionUtils(Level level, BlockPos pos, int radius, float strength) {
+		this.level = level;
+		this.pos = pos;
+		this.radius = radius;
+		this.strength = strength;
+		this.center = new Vec3(pos.getX(),pos.getY(),pos.getZ());
+		bblocks = new float[2*radius+1][2*radius+1];
+		
+		this.maxHeight = radius/3;
+		this.minHeight = 2;
+		this.bbblocks = new float[2*radius+1][minHeight+maxHeight+1][2*radius+1];
+	}
+	
+	
+	public void sMissileExplode(boolean fire, int damage, Entity entityExploding, LivingEntity entityAttacker) {
+		int r = radius;
 		double FIRE_ODDS = 0.15d;
 		
 		if(level.isClientSide()) return; //only server side
@@ -40,7 +86,7 @@ public class ExplosionUtils {
 		for( Entity entity : level.getEntities(entityExploding, new AABB(posV.subtract(rad),posV.add(rad))) ) {
 			if(entity instanceof LivingEntity entityL) {
 				Vec3 dis = entityL.getEyePosition().subtract(posV);
-		        double disLen = dis.length();
+		        float disLen = (float)dis.length();
 		        float damageR = (float) (damage*(1-disLen/(2*r))); //linear decrease
 		        
 		        if(entityL instanceof Player entityP && (entityP.isCreative() || entityP.isSpectator())) continue;
@@ -91,82 +137,7 @@ public class ExplosionUtils {
         }
 	}
 	
-	public static void hBombExplode(Level level, BlockPos pos, Entity entityExploding/*, LivingEntity entityAttacker*/) {
-		double FIRE_ODDS = 0.15d;
-		int RADIUS, r = 23;
-		int depth, d = 6;
-		float STRENGTH, s = 5;
-		int DAMAGE = 20;
-		
-		if(level.isClientSide()) return; //only server side
-		
-		Vec3 posV = new Vec3(pos.getX(),pos.getY(),pos.getZ());
-		Vec3 rad = new Vec3(1.5*r,1.5*r,1.5*r);
-		
-		//entity damage
-		for( Entity entity : level.getEntities(entityExploding, new AABB(posV.subtract(rad),posV.add(rad))) ) {
-			if(entity instanceof LivingEntity entityL) {
-				Vec3 dis = entityL.getEyePosition().subtract(posV);
-		        double disLen = dis.length();
-		        float damageR = (float) (DAMAGE*(1-disLen/(2*r))); //linear decrease
-		        //fire
-		        entityL.setSecondsOnFire(4);
-		        /*
-		        //damage
-		        entityL.hurt(DamageSource.explosion(entityAttacker), damageR);
-		        //effects
-		        int d1 = (int) (120*(1-disLen/(3*r))); //duration
-		        entityL.addEffect(new MobEffectInstance(MobEffects.CONFUSION,d1,1,false,false,false), entityAttacker);
-		        entityL.addEffect(new MobEffectInstance(MobEffects.BLINDNESS,d1,1,false,false,false), entityAttacker);
-		        entityL.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,d1,1,false,false,false), entityAttacker);
-		        entityL.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN,d1,1,false,false,false), entityAttacker);*/
-			}
-		}
-		//world damage
-		for (int y = d; y > -d - 1; y--) { //from bottom to top
-            for (int x = -r; x < r + 1; x++) {
-                for (int z = -r; z < r + 1; z++) {
-                	BlockPos pPos = new BlockPos(posV.add(x,y,z));
-                    BlockState state = level.getBlockState(pPos);
-                    Block block = state.getBlock();
-                    
-                    if(x * x + z * z > r * r || !inHeight(Math.sqrt(x*x+z*z),y)) { //if out of radius/sphere, only try to place fire
-                    	if(block == Blocks.AIR) {
-                    		ignite(level,pPos,FIRE_ODDS);
-                        }
-                    	continue;
-                    }
-                    //blocks that shouldnt explode/be moved
-                    if(block == Blocks.BEDROCK || block == Blocks.WATER || block == Blocks.LAVA || block == Blocks.AIR || block == Blocks.FIRE) continue;
-                   
-                    //System.out.println("x: "+x+"  y: "+y+"  z: "+z+"  r: "+r+"   odds: "+((0d+x*x+z*z)/(1d*r*r)));
-                    if(random.nextDouble() > (0d+x*x+z*z)/(1d*r*r) && (y < 0 ? random.nextDouble() > -1d*y/(2d*d) : true)	) {
-                    	level.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
-                    }
-                    /*
-                    if(state.isSolidRender(level, pPos)) {
-                    	float xMotion = random.nextFloat()* s - s / 2f;
-                        float yMotion = (random.nextFloat()+0.1f) * s * 1.2f;
-                        float zMotion = random.nextFloat()* s - s / 2f;
-                        
-                        FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(level,pPos.getX(),pPos.getY(),pPos.getZ(),state);
-                        fallingBlockEntity.setDeltaMovement(xMotion, yMotion, zMotion);
-                        
-                        level.addFreshEntity(fallingBlockEntity);
-                    }
-                    */
-                    ignite(level,pPos,FIRE_ODDS);
-                }
-            }
-        }
-	}
-	
-	public static boolean inHeight(double xz, double y) {
-		return ( 0.00002*Math.pow(xz, 4)-5 <= y /*&& -0.00002*Math.pow(xz, 4)+5 >= y */);
-	}
-	
-	//ignite a given block with a certain probability
-	public static void ignite(Level level, BlockPos pPos, double odds) {
+	public void ignite(Level level, BlockPos pPos, double odds) { // Ignite a given block with a certain probability
 		BlockPos pos = pPos.below();
 		BlockState state = level.getBlockState(pos);
 		
@@ -175,49 +146,7 @@ public class ExplosionUtils {
         }
 	}
 	
-	// Non Static
-	
-	private Random rrandom = new Random();
-	
-	private Level level;
-	
-	private BlockPos pos;
-	private Vec3 center; // Vec3 of BlockPos pos
-	private int radius;
-	private float strength;
-	private float[][] bblocks; // x|z
-	
-	private static final float FIRE_ODDS = 0.1f;
-	
-	private static final Map<Block, Block> BLOCKS_DAMAGED = Map.ofEntries(
-		// Stone
-		Map.entry(Blocks.STONE, Blocks.COBBLESTONE),
-		Map.entry(Blocks.COBBLESTONE, Blocks.GRAVEL),
-		Map.entry(Blocks.STONE_BRICKS, Blocks.CRACKED_STONE_BRICKS),
-		// Logs
-		Map.entry(Blocks.OAK_LOG, Blocks.STRIPPED_OAK_LOG),
-		Map.entry(Blocks.DARK_OAK_LOG, Blocks.STRIPPED_DARK_OAK_LOG),
-		Map.entry(Blocks.BIRCH_LOG, Blocks.STRIPPED_BIRCH_LOG),
-		Map.entry(Blocks.JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_LOG),
-		Map.entry(Blocks.ACACIA_LOG, Blocks.STRIPPED_ACACIA_LOG),
-		Map.entry(Blocks.SPRUCE_LOG, Blocks.STRIPPED_SPRUCE_LOG),
-		Map.entry(Blocks.GRASS_BLOCK, Blocks.DIRT)
-	);
-	
-	public ExplosionUtils(Level level, BlockPos pos, int radius, float strength) {
-		this.level = level;
-		this.pos = pos;
-		this.radius = radius;
-		this.strength = strength;
-		this.center = new Vec3(pos.getX(),pos.getY(),pos.getZ());
-		bblocks = new float[2*radius+1][2*radius+1];
-		
-		this.maxHeight = radius/3;
-		this.minHeight = 2;
-		this.bbblocks = new float[2*radius+1][minHeight+maxHeight+1][2*radius+1];
-	}
-	
-	// Methods
+	// Explode 2d
 	
 	public void tExplode() {
 		
@@ -319,142 +248,7 @@ public class ExplosionUtils {
 		return new int[] {dx, dz};
 	}
 	
-	// Explode 2
-	
-	private float[][][] bbblocks; // x|y|z
-
-	int maxHeight;
-	int minHeight;
-	
-	public void tExplode2() {
-		System.out.println("RUN EXPLODE 2");
-		
-		bbblocks[radius][minHeight][radius] = 1; // Center of Explosion
-		
-		if(!level.getBlockState(pos).is(Blocks.BEDROCK)) {
-			level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
-		}
-		int dy = -minHeight;
-		
-		for(int k = 0; k <= minHeight+maxHeight; k++) {
-			
-			int dx = 0;
-			int dz = 0;
-			
-			int yradius = radiusAtY(dy);
-			
-			for(int i = 1;i <= yradius; i++) {
-				
-				dx++;
-				dz--;
-				
-				for(int j = 1;j <= 2*i; j++) {
-					dx--;
-					
-					calc2(dx, dy, dz, yradius);
-				}
-				for(int j = 1;j <= 2*i; j++) {
-					dz++;
-					
-					calc2(dx, dy, dz, yradius);
-				}
-				for(int j = 1;j <= 2*i; j++) {
-					dx++;
-					
-					calc2(dx, dy, dz, yradius);
-				}
-				for(int j = 1;j <= 2*i; j++) {
-					dz--;
-					
-					calc2(dx, dy, dz, yradius);
-				}
-				
-			}
-
-			dy++;
-		}
-	}
-	
-	public void calc2(int dx, int dy, int dz, int radius) {
-		float rad = 1f - ( (dx*dx+dz*dz) / (float)(radius*radius) );
-		
-		if(rad >= 0) {
-			BlockPos pPos = new BlockPos(center.add(dx,dy,dz));
-
-			float p = level.getBlockState(pPos).getExplosionResistance(level, pPos, null);
-			
-			if(p > 10) {
-				p = 0;
-			} else {
-				p = 1-(float)(p / 10);
-			}
-			
-			int[] t = xyz(dx,dy,dz);
-			bbblocks[dx+radius][dy+minHeight][dz+radius] = p * bbblocks[t[0]+radius][t[1]+minHeight][t[2]+radius];
-			
-			color2(level, pPos, bbblocks[dx+radius][dy+minHeight][dz+radius]*rad);
-			//color(level, pPos, bblocks[dx+radius][dz+radius]*rad);;
-		}
-	}
-	
-	public int[] xyz(int dx, int dy, int dz) {
-		float angxz = 0;
-		if(dx != 0) angxz = (float)(Math.atan(dz/(float)dx)*180/Math.PI);
-		
-		if(dx < 0 && dz > 0) angxz+=180;
-		else if(dx < 0 && dz < 0) angxz-=180;
-		else if(dx == 0 && dz > 0) angxz=90;
-		else if(dx == 0 && dz < 0) angxz=-90;
-		else if(dz == 0 && dx > 0) angxz=0;
-		else if(dz == 0 && dx < 0) angxz=180;
-		
-		if(angxz < -150) {
-			dx++;
-		} else if(angxz < -120) {
-			dz++;
-			dx++;
-		} else if(angxz < -60) {
-			dz++;
-		} else if(angxz < -30) {
-			dz++;
-			dx--;
-		} else if(angxz < 30) {
-			dx--;
-		} else if(angxz < 60) {
-			dz--;
-			dx--;
-		} else if(angxz < 120) {
-			dz--;
-		} else if(angxz < 150) {
-			dz--;
-			dx++;
-		} else if(angxz <= 180) {
-			dx++;
-		}
-		
-		
-		float angy = 0;
-		float dxz = (float)Math.sqrt(dx*dx+dz*dz);
-		if(dx != 0 || dz != 0) angy = (float)(Math.atan(dy/dxz)*180/Math.PI);
-		
-		if(dxz == 0 && dy > 0) angy=90;
-		else if(dxz == 0 && dy < 0) angy=-90;
-		else if(dy == 0) angy=0;
-		
-		if(angy < -60) {
-			dy+=2;
-		} else if(angy < -30) {
-			dy++;
-		} else if(angy < 30) {
-			//dy--;
-		} else if(angy < 60) {
-			dy--;
-		} else if(angy < 90) {
-			dy-=2;
-		}
-		
-		return new int[] {dx, dy, dz};
-	}
+	// Explode 3d
 	
 	public int radiusAtY(int dy) {
 		if(dy > 0) 
@@ -472,8 +266,6 @@ public class ExplosionUtils {
 			return radius;
 		}
 	}
-	
-	// Explode 3
 	
 	public void tExplode3() {
 		bbblocks[radius][minHeight][radius] = 1; // Center of Explosion -> p = 1
@@ -571,51 +363,40 @@ public class ExplosionUtils {
 		}
 	}
 	
-	public void calc3(int dx, int dy, int dz, int radius) {
-		
-		float rad = 1f - ( (dx*dx+dz*dz) / (float)(radius*radius) ); // The relative distance of the current position between the center of the circle and edge of the circle --> used for odds
+	public void calc3(int dx, int dy, int dz, int yradius) {
+		float rad = 1f - ( (dx*dx+dz*dz) / (float)(yradius*yradius) ); // The relative distance of the current position between the center of the circle and edge of the circle --> used for odds
 		
 		if(rad >= 0) {
 			BlockPos curPos = new BlockPos(center.add(dx,dy,dz)); // The position currently being dealt with => center + deltaVector
-			
-			// Debug
-			//System.out.println("-\npos hier: "+pPos.getX()+" "+pPos.getY()+" "+pPos.getZ());
-			// E Debug
 			
 			float p = level.getBlockState(curPos).getExplosionResistance(level, curPos, null); // Returns the explosion-resistance of the block at current-position
 			
 			if(p > 10) { // Probability to explode is 0
 				p = 0;
 			} else {
-				p = 1-(float)(p / 10); // Calculating probability using explosion-resistance
+				p = 1-(float)(p / 10 / strength); // Calculating probability using explosion-resistance
 			}
 			
+			if(rad > 0.9 && p > 0.05) {
+				p += (1 - rad - 0.2) * (-2);
+			}
 			
-			int[] t = xyz2(dx,dy,dz); // Obtaining index of block explosion "meets" before this block, to use its probability in calculation
+			if(p > 1) p = 1;
 			
-			bbblocks[dx+radius][dy+minHeight][dz+radius] = p * bbblocks[t[0]+radius][t[1]+minHeight][t[2]+radius];
 			
-			BlockPos ppPos = new BlockPos(center.add(t[0],t[1],t[2]));
-			System.out.println("Pos here: "+pPos.getX()+" "+pPos.getY()+" "+pPos.getZ()+"  Pos there: "+ppPos.getX()+" "+ppPos.getY()+" "+ppPos.getZ());
-			System.out.println("Changed Value at: "+(dx+radius)+" "+(dy+radius)+" "+(dz+radius)+"  to  "+bbblocks[dx+radius][dy+minHeight][dz+radius]);
-			// Debug
-			//System.out.println("dxyz: " +dx+" "+dy+" "+dz+"  -> "+t[0]+" "+t[1]+" "+t[2]);
-			//System.out.println("p hier: "+p+" ?= "+bbblocks[dx+radius][dy+minHeight][dz+radius]);
-			//BlockPos ppPos = new BlockPos(center.add(t[0],t[1],t[2]));
-			//System.out.println("pos da: "+ppPos.getX()+" "+ppPos.getY()+" "+ppPos.getZ());
-			//System.out.println("p da: "+bbblocks[t[0]+radius][t[1]+minHeight][t[2]+radius]);
-			// E Debug
+			int[] t = xyz(dx,dy,dz); // Obtaining index of block explosion "meets" before this block, to use its probability in calculation
 			
-			color2(level, pPos, bbblocks[dx+radius][dy+minHeight][dz+radius]*rad);
+			bbblocks[dx+radius][dy+minHeight][dz+radius] = p * bbblocks[t[0]+radius][t[1]+minHeight][t[2]+radius]; // Current blocks p to save in array is (the calculated value * the "earlier" blocks p)
+			
+			//color2(level, curPos, (bbblocks[dx+radius][dy+minHeight][dz+radius]) * rad); // Color the current block accordingly to its p * rad
+			remove(level, curPos, (bbblocks[dx+radius][dy+minHeight][dz+radius]) * rad, FIRE_ODDS );
 			//color(level, pPos, bblocks[dx+radius][dz+radius]*rad);;
 		}
 	}
 	
-	public int[] xyz2(int dx, int dy, int dz) {
-		Vec3 d = new Vec3(dx,dy,dz);
-		d = d.normalize();
-		
-		System.out.println("dxyz: " +dx+" "+dy+" "+dz+"  norm -> "+d.x+" "+d.y+" "+d.z);
+	public int[] xyz(int dx, int dy, int dz) {
+		Vec3 d = new Vec3(dx,dy,dz); // Create distance vector from center
+		d = d.normalize(); // Normalize it
 		
 		dx = (int)(dx + 0.5 - d.x); if(dx < 0) dx--;
 		dy = (int)(dy + 0.5 - d.y); if(dy < 0) dy--;
@@ -647,7 +428,6 @@ public class ExplosionUtils {
 	}
 	
 	public void color2(Level level, BlockPos pos, float p) {
-		pos = new BlockPos(pos.getX(), pos.getY(), pos.getZ());
 		if(!level.getBlockState(pos).is(Blocks.AIR)) return;
 		
 		if(p < 0.03) {
@@ -669,18 +449,32 @@ public class ExplosionUtils {
 		}
 	}
 	
+	// Try to remove/damage block, given odds for destruction and fire
 	public void remove(Level level, BlockPos pos, float p_d, float p_f) {
-		if(rrandom.nextFloat() < p_d && p_d > 0.03) { // Destroy Block completely
-			level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
-			if(rrandom.nextFloat() < p_f) {
-				level.setBlockAndUpdate(pos, Blocks.FIRE.defaultBlockState());
+		// Destroy block completely
+		if(random.nextFloat() < p_d && p_d > 0.03) {
+			// Replace block with fire
+			if(random.nextFloat() < p_f) {
+				replaceBlock(level, pos, Blocks.FIRE.defaultBlockState());
+			// Replace block with air
+			} else {
+				replaceBlock(level, pos, Blocks.AIR.defaultBlockState());
 			}
-		} else if(rrandom.nextFloat() < p_d && p_d > 0.03) { // "Damage" Block
+		// "Damage" block
+		} else if(random.nextFloat() < 0.5*p_d && p_d > 0.03) {
 			Block block = level.getBlockState(pos).getBlock();
 			
 			if(BLOCKS_DAMAGED.containsKey(block)) {
 				level.setBlockAndUpdate(pos, BLOCKS_DAMAGED.get(block).defaultBlockState());
 			}
 		}
+	}
+	
+	// Optimized replacement of blocks
+	public void replaceBlock(Level level, BlockPos pos, BlockState state) {
+		level.setBlockAndUpdate(pos, state);
+		if(!level.getBlockState(pos.above()).canSurvive(level, pos)) {
+			replaceBlock(level, pos.above(), Blocks.AIR.defaultBlockState());
+		} 
 	}
 }

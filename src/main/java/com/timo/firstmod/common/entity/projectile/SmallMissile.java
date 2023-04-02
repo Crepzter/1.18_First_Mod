@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.timo.firstmod.core.init.PacketHandler;
+import com.timo.firstmod.core.init.SoundInit;
 import com.timo.firstmod.core.network.ClientBoundRocketProjectileExplosionPacket;
 import com.timo.firstmod.utils.ExplosionUtils;
 
@@ -16,6 +17,9 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -23,6 +27,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -88,6 +93,7 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	    }
 		//Update and sync Target Pos, get Entity from uuid
 		if(!level.isClientSide()) {
+			//level.playSound(null, this, SoundInit.SMALL_MISSILE_FLYING.get(), SoundSource.NEUTRAL, 2.0F, 1.0F);
 			updateTargetPos(((ServerLevel)level).getEntity(targetId));
 		}
 	}
@@ -118,29 +124,16 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	public void explode(BlockPos pos) {
 		if(!level.isClientSide() && shotBy != null) {
 			//world damage
-			//ExplosionUtils.sMissileExplode(EXPLOSION_RADIUS, EXPLOSION_STRENGTH, level, pos, true, EXPLOSION_DAMAGE, this, shotBy); //3,2,12
-			
-			/*BlockPos ppos = pos.below();
-			for(int i = 0;i < 7;i++) {
-				ExplosionUtils e = new ExplosionUtils(level, ppos, 30, 1);
-				e.tExplode();
-				ppos = ppos.above();
-			}*/
-			ExplosionUtils e = new ExplosionUtils(level, pos, 30, 1);
-			e.tExplode3();
+			ExplosionUtils e = new ExplosionUtils(level, pos, EXPLOSION_RADIUS, EXPLOSION_STRENGTH);
+			e.sMissileExplode(true, EXPLOSION_DAMAGE, this, shotBy);
+			//ExplosionUtils e = new ExplosionUtils(level, pos, 30, EXPLOSION_STRENGTH);
+			//e.tExplode3();
 
 			//particles and sound --> Client Side
 			PacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(pos)),
 										new ClientBoundRocketProjectileExplosionPacket(pos));
 		}
 		this.discard();
-	}
-	
-	public void setRotation(float xRot, float yRot) {
-		this.setXRot(xRot);
-		this.xRotO = xRot;
-		this.setYRot(xRot);
-		this.yRotO = yRot;
 	}
 	
 	@Override
@@ -153,6 +146,11 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	protected void onHitEntity(EntityHitResult result) {
 		super.onHitEntity(result);
 		this.explode(new BlockPos(result.getLocation()));
+	}
+	
+	@Override
+	protected void playStepSound(BlockPos p_20135_, BlockState p_20136_) {
+		this.playSound(SoundInit.SMALL_MISSILE_FLYING.get(), 0.15F, 1.0F);
 	}
 	
 	@Override
@@ -180,6 +178,13 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	}
 	
 	//getter & setter
+	public void setRotation(float xRot, float yRot) {
+		this.setXRot(xRot);
+		this.xRotO = xRot;
+		this.setYRot(xRot);
+		this.yRotO = yRot;
+	}
+	
 	public void setTarget(BlockPos pos) {
 		targetB = new Vec3(pos.getX()+0.5,pos.getY()+0.5,pos.getZ()+0.5);
 	}

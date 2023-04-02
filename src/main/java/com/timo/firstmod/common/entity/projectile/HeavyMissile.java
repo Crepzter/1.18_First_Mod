@@ -1,11 +1,17 @@
 package com.timo.firstmod.common.entity.projectile;
 
+import java.util.List;
+import java.util.Map;
+
+import com.timo.firstmod.core.init.SoundInit;
 import com.timo.firstmod.utils.ExplosionUtils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -17,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -32,6 +39,14 @@ public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
 	public static double SPEED = 2.5d;
 	
 	private int blocksHit = 0;
+	private Vec3 lastSpeed = new Vec3(0,0,0);
+	
+	private static final List<Block> WEAK_BLOCKS = List.of(
+		Blocks.SNOW_BLOCK, Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW,
+		Blocks.ICE, Blocks.FROSTED_ICE,
+		Blocks.ACACIA_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.JUNGLE_LEAVES,
+		Blocks.GRAVEL
+	);
 
 	public HeavyMissile(EntityType<? extends ThrowableProjectile> entity, Level level) {
 		super(entity, level);
@@ -53,34 +68,41 @@ public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
 	    }
 		
 		//Acceleration
-		setDeltaMovement(getDeltaMovement().multiply(1.01d,1.01d,1.01d));
+		if(!isInWater()) {
+			lastSpeed = getDeltaMovement();
+			setDeltaMovement(getDeltaMovement().multiply(1.01d,1.01d,1.01d));
+		} else {
+			if(getDeltaMovement().lengthSqr() < lastSpeed.multiply(0.7,0.7,0.7).lengthSqr()) {
+				setDeltaMovement(lastSpeed.multiply(0.7,0.7,0.7));
+			} else {
+				setDeltaMovement(getDeltaMovement().multiply(1.4d,1.4d,1.4d));
+			}
+		}
 	}
 	
 	public void explode(Level level, BlockPos pos) {
-		hitEffect(pos);
-		ExplosionUtils.hBombExplode(level, pos, this);
+		if(!level.isClientSide()) {
+			level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundInit.HEAVY_EXPLOSION.get(), SoundSource.BLOCKS, 8.0F, 1.0F);
+		}
+		if(!level.isClientSide()) {
+			hitEffect(pos);
+			ExplosionUtils e = new ExplosionUtils(level, pos, 40, 2);
+			e.tExplode3();
+		}
+		level.gameEvent(this, GameEvent.RING_BELL, pos);
 		discard();
 	}
 	
 	@Override
 	protected void onHitBlock(BlockHitResult result) {
-		if(level.isClientSide()) return;
-		//fly through dirt, leaves...
 		BlockPos pos  = result.getBlockPos();
-		BlockState state = level.getBlockState(result.getBlockPos());
 		Block block = level.getBlockState(result.getBlockPos()).getBlock();
-		if(state.isSolidRender(level, pos)) {
-			if(block != Blocks.BEDROCK) {
-				if(blocksHit > 2) explode(level,result.getBlockPos());
-				else {
-					level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
-					blocksHit++;
-				}
-			} else {
-				explode(level,result.getBlockPos());
-			}
-		} else {
+		
+		if(WEAK_BLOCKS.contains(block)) {
 			level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+		} else {
+			if(blocksHit < 2) { level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState()); blocksHit++; }
+			else explode(level,result.getBlockPos().above().above());
 		}
 	}
 	
@@ -93,7 +115,7 @@ public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
 		if (entity instanceof LivingEntity) {
 		   areaeffectcloud.setOwner((LivingEntity)entity);
 		}
-		areaeffectcloud.setParticle(ParticleTypes.EXPLOSION);
+		//areaeffectcloud.setParticle(ParticleTypes.EXPLOSION);
 		areaeffectcloud.setRadius(radius);
 		areaeffectcloud.setDuration(duration);
 		areaeffectcloud.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 160, 1));
