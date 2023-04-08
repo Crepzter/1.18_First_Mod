@@ -36,11 +36,14 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
+	// Data
 	public static double SPEED = 2.5d;
 	
 	private int blocksHit = 0;
 	private Vec3 lastSpeed = new Vec3(0,0,0);
+	private LivingEntity shooter = null;
 	
+	// List of Blocks the Missile will fly through
 	private static final List<Block> WEAK_BLOCKS = List.of(
 		Blocks.SNOW_BLOCK, Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW,
 		Blocks.ICE, Blocks.FROSTED_ICE,
@@ -48,15 +51,17 @@ public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
 		Blocks.GRAVEL
 	);
 
+	// Constructor
 	public HeavyMissile(EntityType<? extends ThrowableProjectile> entity, Level level) {
 		super(entity, level);
 	}
 
+	// Tick
 	@Override
 	public void tick() {
 		super.tick();
 		
-		//Particle Spawning Client Side
+		// Particle Spawning Client Side
 		if(level.isClientSide()) {
 			Vec3 pos = getNullPos().add(getDeltaMovement().normalize().multiply(-0.75, -0.75, -0.75));
 			Vec3 mov = getDeltaMovement().normalize().multiply(-0.4,-0.4,-0.4);
@@ -67,7 +72,7 @@ public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
 	        }
 	    }
 		
-		//Acceleration
+		// Acceleration
 		if(!isInWater()) {
 			lastSpeed = getDeltaMovement();
 			setDeltaMovement(getDeltaMovement().multiply(1.01d,1.01d,1.01d));
@@ -80,17 +85,22 @@ public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
 		}
 	}
 	
+	// Explode
 	public void explode(Level level, BlockPos pos) {
 		if(!level.isClientSide()) {
 			level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundInit.HEAVY_EXPLOSION.get(), SoundSource.BLOCKS, 8.0F, 1.0F);
 		}
 		if(!level.isClientSide()) {
-			hitEffect(pos);
-			ExplosionUtils e = new ExplosionUtils(level, pos, 40, 2);
-			e.tExplode3();
+			ExplosionUtils e = new ExplosionUtils(level, pos, this, shooter, 50, 0.25f);
+			e.explode();
 		}
 		level.gameEvent(this, GameEvent.RING_BELL, pos);
 		discard();
+	}
+	
+	// Other
+	public void setShotBy(LivingEntity shooter) {
+		this.shooter = shooter;
 	}
 	
 	@Override
@@ -106,32 +116,12 @@ public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
 		}
 	}
 	
-	public void hitEffect(BlockPos pos) {
-		int radius = 25;
-		int duration = 20;
-		
-		AreaEffectCloud areaeffectcloud = new AreaEffectCloud(this.level, this.getX(), this.getY(), this.getZ());
-		Entity entity = this.getOwner();
-		if (entity instanceof LivingEntity) {
-		   areaeffectcloud.setOwner((LivingEntity)entity);
-		}
-		//areaeffectcloud.setParticle(ParticleTypes.EXPLOSION);
-		areaeffectcloud.setRadius(radius);
-		areaeffectcloud.setDuration(duration);
-		areaeffectcloud.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 160, 1));
-		areaeffectcloud.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 160, 1));
-		
-		areaeffectcloud.setPos(pos.getX(), pos.getY(), pos.getZ());
-		
-		this.level.addFreshEntity(areaeffectcloud);
-	}
-	
 	@Override
 	protected void onHitEntity(EntityHitResult p_37259_) {
 		super.onHitEntity(p_37259_);
 	}
 
-	//geckolib
+	// geckolib
 	private final AnimationFactory factory = new AnimationFactory(this);
 		
 	@Override
@@ -148,7 +138,7 @@ public class HeavyMissile extends ThrowableProjectile implements IAnimatable {
 		return factory;
 	}
 	
-	//other stuff
+	// other stuff
 	
 	public Vec3 getNullPos() {
 		return new Vec3(this.getX(),this.getY(),this.getZ());

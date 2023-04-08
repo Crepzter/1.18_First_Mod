@@ -5,8 +5,11 @@ import com.timo.firstmod.utils.ExplosionUtils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 
 public class GravityWand extends Item {
 
@@ -16,15 +19,14 @@ public class GravityWand extends Item {
 	
 	@Override
 	public InteractionResult useOn(UseOnContext context) {
-		//var player = context.getPlayer();
-		//var level = player.level;
+		Player player = context.getPlayer();
+		Level level = player.level;
 		BlockPos hitPos = context.getClickedPos();
 		
-		int r = 6;
-		int strength = 3;
-		
-		ExplosionUtils e = new ExplosionUtils(context.getLevel(), hitPos, r, strength);
-		e.sMissileExplode(false, 0, context.getPlayer(), context.getPlayer());
+		if(level.isClientSide()) {
+			level.setBlock(hitPos, Blocks.RED_CONCRETE.defaultBlockState(), 4);
+		}
+
 		return InteractionResult.SUCCESS;
 	}
 }

@@ -41,12 +41,15 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 public class SmallMissile extends ThrowableProjectile implements IAnimatable {
-	private static final double SPEED = 0.625D;
-	private static final int EXPLOSION_RADIUS = 3;
-	private static final int EXPLOSION_STRENGTH = 2;
-	private static final int EXPLOSION_DAMAGE = 12;
+	// Data
+	private static final float SPEED = 0.625f;
+	private static final int EXPLOSION_RADIUS = 6;
+	private static final float EXPLOSION_STRENGTH = 0.4f;
 	
-	//target stuff
+	private LivingEntity shooter = null;
+	private int delay = 20;
+	
+	// Target Data
 	private static final EntityDataAccessor<Float> TARGET_X = SynchedEntityData.defineId(SmallMissile.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Float> TARGET_Y = SynchedEntityData.defineId(SmallMissile.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Float> TARGET_Z = SynchedEntityData.defineId(SmallMissile.class, EntityDataSerializers.FLOAT);
@@ -56,18 +59,17 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	@Nullable
 	private Vec3 targetB;
 	
-	private LivingEntity shotBy;
-	
-	private int delay = 20;
-	
+	// Constructor
 	public SmallMissile(EntityType<? extends ThrowableProjectile> entity, Level level) {
 		super(entity, level);
 		this.setNoGravity(true);
 	}
 	
+	// Tick
 	@Override
 	public void tick() {
-		super.tick();		
+		super.tick();
+		
 		//Movement Calculation
 		Vec3 target = this.getTargetPos();
 		if(target != null) {
@@ -117,17 +119,15 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 		
 		xRotO = (float)(Mth.atan2(vec3.y, d0) * (double)(180F / (float)Math.PI));
 		yRotO = (float)(Mth.atan2(vec3.x, vec3.z) * (double)(180F / (float)Math.PI));
-		setXRot(xRotO);
-		setYRot(yRotO);
+		this.setXRot(xRotO);
+		this.setYRot(yRotO);
 	}
 	
 	public void explode(BlockPos pos) {
-		if(!level.isClientSide() && shotBy != null) {
+		if(!level.isClientSide()) {
 			//world damage
-			ExplosionUtils e = new ExplosionUtils(level, pos, EXPLOSION_RADIUS, EXPLOSION_STRENGTH);
-			e.sMissileExplode(true, EXPLOSION_DAMAGE, this, shotBy);
-			//ExplosionUtils e = new ExplosionUtils(level, pos, 30, EXPLOSION_STRENGTH);
-			//e.tExplode3();
+			ExplosionUtils e = new ExplosionUtils(level, pos, this, shooter, EXPLOSION_RADIUS, EXPLOSION_STRENGTH);
+			e.explode();
 
 			//particles and sound --> Client Side
 			PacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(pos)),
@@ -177,7 +177,8 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	    }
 	}
 	
-	//getter & setter
+	// getter & setter
+	
 	public void setRotation(float xRot, float yRot) {
 		this.setXRot(xRot);
 		this.xRotO = xRot;
@@ -194,8 +195,8 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 		this.targetId = targetId;
 	}
 	
-	public void setShotBy(LivingEntity shotBy) {
-		this.shotBy = shotBy;
+	public void setShotBy(LivingEntity shooter) {
+		this.shooter = shooter;
 	}
 	
 	public void updateTargetPos(Entity entity) {
@@ -222,7 +223,7 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 		return new Vec3(this.entityData.get(TARGET_X), this.entityData.get(TARGET_Y), this.entityData.get(TARGET_Z));
 	}
 
-	//geckolib
+	// geckolib
 	private final AnimationFactory factory = new AnimationFactory(this);
 		
 	@Override
@@ -239,7 +240,7 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 		return factory;
 	}
 	
-	//other stuff
+	// other stuff
 	public Vec3 getNullPos() {
 		return new Vec3(this.getX(),this.getY(),this.getZ());
 	}

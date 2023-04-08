@@ -107,7 +107,6 @@ public class RocketLauncher extends Item implements IAnimatable, ISyncable {
 			// Play Sound indicating target locked
 			if(entityTargetId != null && targetTick > LOCK_TARGET_TIME) {
 				level.playSound(null, entity.getX(), entity.getEyeY(), entity.getZ(), SoundInit.ROCKET_LAUNCHER_TARGET_LOCKED.get(), SoundSource.PLAYERS, 0.6F, 1F);
-				System.out.println("sound");
 				// Mark Target
 			}
 			useTick++;
@@ -148,7 +147,7 @@ public class RocketLauncher extends Item implements IAnimatable, ISyncable {
 			// Push shooter back
 			Vec3 dir = shooter.getLookAngle();
 			shooter.push(-3*dir.x,0.15,-3*dir.z);
-			if(shooter instanceof Player) ((Player)shooter).hurtMarked = true;
+			shooter.hurtMarked = true;
 		}
 	}
 
