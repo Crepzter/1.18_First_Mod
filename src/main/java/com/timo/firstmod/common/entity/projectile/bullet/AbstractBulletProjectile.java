@@ -17,7 +17,7 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
-public class AbstractBulletProjectile  extends ThrowableProjectile implements IAnimatable{
+public class AbstractBulletProjectile extends ThrowableProjectile implements IAnimatable{
 
 	protected AbstractBulletProjectile(EntityType<? extends ThrowableProjectile> entity, Level level) {
 		super(entity, level);

@@ -3,29 +3,19 @@ package com.timo.firstmod.utils;
 import java.util.Map;
 import java.util.Random;
 
-import com.google.common.collect.Maps;
-
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.Tags;
 
 public class ExplosionUtils {
 	private Random random = new Random();
@@ -43,8 +33,6 @@ public class ExplosionUtils {
 	int minHeight;
 	
 	private float[][][] blocks; // x|y|z
-	
-	private static final float FIRE_ODDS = 0.1f;
 	
 	// Damage Blocks Map
 	private static final Map<Block, Block> BLOCKS_DAMAGED = Map.ofEntries(
@@ -160,7 +148,7 @@ public class ExplosionUtils {
 			
 			blocks[dx+radius][dy+minHeight][dz+radius] = p_this; // Current blocks p to save in array is (the calculated value * the "earlier" blocks p)
 			
-			remove(curPos, p_this, FIRE_ODDS );
+			remove(curPos, p_this, (p_rad < 0.6f) ? 0.1f*p_rad : 0.1f*p_this );
 		}
 	}
 	
@@ -168,24 +156,24 @@ public class ExplosionUtils {
 		for( Entity entityL : level.getEntities(source, new AABB(center.subtract(radius-1,minHeight-1,radius-1),center.add(radius-1,maxHeight-1,radius-1))) ) {
 			if(entityL instanceof LivingEntity entity) 
 			{
-				Vec3 pos = entity.getPosition(0f);
+				Vec3 pos = entity.getEyePosition();
 				int x = (int) (pos.x-center.x+radius);
 				int y = (int) (pos.y-center.y+minHeight);
 				int z = (int) (pos.z-center.z+radius);
 				float p = blocks[x][y][z];
 				
 		        // fire
-		        entity.setSecondsOnFire((int)(strength * 10f * p));
+		        entity.setSecondsOnFire((int)(10f * p));
 		        // damage
 		        entity.hurt(DamageSource.explosion(entity), strength * radius * p);
 		        // effects
-		        int d = (int)(strength * 20f * p); //duration
+		        int d = (int)(200f * p); //duration
 		        entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION,d,1,false,false,true), attacker);
 		        entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS,d,1,false,false,true), attacker);
 		        entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,d*2,1,false,false,true), attacker);
 		        entity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN,d*2,1,false,false,true), attacker);
 		        
-		        Vec3 push = new Vec3(x,y,z).normalize().multiply(0.05*radius*p, 0.05*radius*p, 0.05*radius*p);
+		        Vec3 push = new Vec3(x-radius,y-minHeight,z-radius).normalize().multiply(0.05*radius*p, 0.05*radius*p, 0.05*radius*p);
 		        entity.push(push.x,push.y,push.z);
 		        entity.hurtMarked = true;
 			}
@@ -226,7 +214,7 @@ public class ExplosionUtils {
 		// 		res = 10: p_delta = 1 / (radius * strength)
 		
 		float a = 1f / (radius * strength * 2); //p_d_min_res
-		float b = 1f / (radius * strength);	 //p_d_max_res
+		float b = 2f / (radius * strength);	 //p_d_max_res
 		
 		int max_r = 4;
 		if(res > max_r) res = max_r;
@@ -263,7 +251,8 @@ public class ExplosionUtils {
 	}
 	
 	// Try to remove/damage block, given odds for destruction and fire
-	public void remove(BlockPos pos, float p_d, float p_f) {
+	public void remove(BlockPos pos, float p_d, float p_f) 
+	{
 		// Destroy block completely
 		if(random.nextFloat() < p_d && p_d > 0.03) {
 			// Replace block with fire
@@ -284,6 +273,7 @@ public class ExplosionUtils {
 				level.setBlockAndUpdate(pos, BLOCKS_DAMAGED.get(block).defaultBlockState());
 			}
 		}
+		
 		// Launch Block
 		if(random.nextFloat() < 0.5*p_d && p_d > 0.2) {
 			Vec3 fly = new Vec3(pos.getX(),pos.getY(),pos.getZ()).subtract(center).normalize().multiply(p_d*1.2, p_d*1.2, p_d*1.2);

@@ -40,14 +40,14 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
-public class SmallMissile extends ThrowableProjectile implements IAnimatable {
+public class SmallMissile extends AbstractAirProjectile {
 	// Data
 	private static final float SPEED = 0.625f;
 	private static final int EXPLOSION_RADIUS = 6;
-	private static final float EXPLOSION_STRENGTH = 0.4f;
+	private static final float EXPLOSION_STRENGTH = 0.6f;
 	
-	private LivingEntity shooter = null;
 	private int delay = 20;
+	private int soundTick = 40;
 	
 	// Target Data
 	private static final EntityDataAccessor<Float> TARGET_X = SynchedEntityData.defineId(SmallMissile.class, EntityDataSerializers.FLOAT);
@@ -70,7 +70,7 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	public void tick() {
 		super.tick();
 		
-		//Movement Calculation
+		// Movement Calculation
 		Vec3 target = this.getTargetPos();
 		if(target != null) {
 			Vec3 dir = target.subtract(this.getNullPos()).normalize().multiply(SPEED,SPEED,SPEED);
@@ -79,11 +79,13 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 			this.explode(new BlockPos(this.getNullPos()));
 		}
 		if(delay > -1) delay--;
-		//remove when target reached
+		
+		// remove when target reached
 		if(target != null && target.subtract(this.getNullPos()).lengthSqr() < 0.2) {
 			this.explode(new BlockPos(this.getNullPos()));
 		}
-		//Particle Spawning Client Side
+		
+		// Particle Spawning Client Side
 		if(level.isClientSide()) {
 			Vec3 pos = this.getNullPos().add(this.getDeltaMovement().normalize().multiply(-0.45, -0.45, -0.45));
 			Vec3 mov = this.getDeltaMovement().normalize().multiply(-0.4,-0.4,-0.4);
@@ -93,13 +95,22 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	        	if(random.nextDouble() < 0.6) level.addParticle(ParticleTypes.FLAME, pos.x, pos.y, pos.z, mov.x, mov.y, mov.z);
 	        }
 	    }
-		//Update and sync Target Pos, get Entity from uuid
+		
+		// Update and sync Target Pos, get Entity from uuid
 		if(!level.isClientSide()) {
 			//level.playSound(null, this, SoundInit.SMALL_MISSILE_FLYING.get(), SoundSource.NEUTRAL, 2.0F, 1.0F);
 			updateTargetPos(((ServerLevel)level).getEntity(targetId));
 		}
+		
+		// Play Sound
+		if(soundTick > 39) {
+			this.playSound(SoundInit.SMALL_MISSILE_FLYING.get(), 0.15F, 1.0F);
+			soundTick = 0;
+		} else {
+			soundTick++;
+		}
 	}
-	
+	/*
 	@Override
 	protected void updateRotation() {
 		if(!level.isClientSide()) {
@@ -109,7 +120,7 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 			setXRot(lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, d0) * (double)(180F / (float)Math.PI))));
 			setYRot(lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * (double)(180F / (float)Math.PI))));
 		}
-	}
+	}*/
 	
 	public void firstRotation(Vec3 vec3) {
 		double d0 = vec3.horizontalDistance();
@@ -123,6 +134,7 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 		this.setYRot(yRotO);
 	}
 	
+	@Override
 	public void explode(BlockPos pos) {
 		if(!level.isClientSide()) {
 			//world damage
@@ -137,20 +149,15 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	}
 	
 	@Override
-	protected void onHitBlock(BlockHitResult result) {
-		super.onHitBlock(result);
-		this.explode(new BlockPos(result.getLocation()));
-	}
-	
-	@Override
 	protected void onHitEntity(EntityHitResult result) {
 		super.onHitEntity(result);
 		this.explode(new BlockPos(result.getLocation()));
 	}
 	
 	@Override
-	protected void playStepSound(BlockPos p_20135_, BlockState p_20136_) {
-		this.playSound(SoundInit.SMALL_MISSILE_FLYING.get(), 0.15F, 1.0F);
+	public void onAddedToWorld() {
+		super.onAddedToWorld();
+		firstRotation(getTargetPos().subtract(getNullPos()));
 	}
 	
 	@Override
@@ -195,10 +202,6 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 		this.targetId = targetId;
 	}
 	
-	public void setShotBy(LivingEntity shooter) {
-		this.shooter = shooter;
-	}
-	
 	public void updateTargetPos(Entity entity) {
 		Vec3 pos;
 		if(targetB != null) {
@@ -241,20 +244,6 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	}
 	
 	// other stuff
-	public Vec3 getNullPos() {
-		return new Vec3(this.getX(),this.getY(),this.getZ());
-	}
-	
-	@Override
-	public Packet<?> getAddEntityPacket() {
-		return NetworkHooks.getEntitySpawningPacket(this);
-	}
-	
-	@Override
-	public boolean isNoGravity() {
-		return true;
-	}
-	
 	@Override
 	protected void defineSynchedData() {
 	 	this.entityData.define(TARGET_X, null);
@@ -265,6 +254,11 @@ public class SmallMissile extends ThrowableProjectile implements IAnimatable {
 	@Override
 	public boolean fireImmune() {
 		return true;
+	}
+
+	@Override
+	public boolean destroysBlocks() {
+		return false;
 	}
 }
 
